@@ -6,8 +6,8 @@ import java.util.List;
 public class MCQQuestion extends Question {
     private List<MCQChoice> choices;
 
-    public MCQQuestion(String question, String[] topics, Integer difficulty, List<MCQChoice> choices) {
-        super(question, topics, difficulty);
+    public MCQQuestion(String question, List<Topic> topics, Integer difficulty, List<MCQChoice> choices) {
+        super(question, topics, difficulty, QuestionType.MULTIPLE_CHOICE);
         this.choices = choices;
     }
 

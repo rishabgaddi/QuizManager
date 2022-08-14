@@ -1,10 +1,12 @@
 package fr.epita.quiz.datamodel;
 
+import java.util.List;
+
 public class Quiz {
     private Question type;
-    private String[] topics;
+    private List<Topic> topics;
 
-    public Quiz(Question type, String[] topics) {
+    public Quiz(Question type, List<Topic> topics) {
         this.type = type;
         this.topics = topics;
     }
@@ -17,11 +19,11 @@ public class Quiz {
         this.type = type;
     }
 
-    public String[] getTopics() {
+    public List<Topic> getTopics() {
         return topics;
     }
 
-    public void setTopics(String[] topics) {
+    public void setTopics(List<Topic> topics) {
         this.topics = topics;
     }
 

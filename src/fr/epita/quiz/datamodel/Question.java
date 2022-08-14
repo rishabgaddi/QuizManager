@@ -1,14 +1,26 @@
 package fr.epita.quiz.datamodel;
 
+import java.util.List;
+
 public class Question {
     private String question;
-    private String[] topics;
+    private List<Topic> topics;
     private Integer difficulty;
+    private Enum<QuestionType> type;
 
-    public Question(String question, String[] topics, Integer difficulty) {
+    public Question(String question, List<Topic> topics, Integer difficulty, Enum<QuestionType> type) {
         this.question = question;
         this.topics = topics;
         this.difficulty = difficulty;
+        this.type = type;
+    }
+
+    public Enum<QuestionType> getType() {
+        return type;
+    }
+
+    public void setType(Enum<QuestionType> type) {
+        this.type = type;
     }
 
     public String getQuestion() {
@@ -19,11 +31,11 @@ public class Question {
         this.question = question;
     }
 
-    public String[] getTopics() {
+    public List<Topic> getTopics() {
         return topics;
     }
 
-    public void setTopics(String[] topics) {
+    public void setTopics(List<Topic> topics) {
         this.topics = topics;
     }
 

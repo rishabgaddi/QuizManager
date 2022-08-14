@@ -30,7 +30,7 @@ public class StudentDBDAO {
         ResultSet resultSet = preparedStatement.executeQuery();
 
         List<Student> students = new ArrayList<>();
-        while (resultSet.next()){
+        while (resultSet.next()) {
             String name = resultSet.getString("studentName");
             String id = resultSet.getString("id");
             students.add(new Student(id, name));

@@ -2,6 +2,8 @@ package fr.epita.quiz.services.data.dao;
 
 import fr.epita.quiz.datamodel.OpenQuestion;
 import fr.epita.quiz.datamodel.Question;
+import fr.epita.quiz.datamodel.QuestionType;
+import fr.epita.quiz.datamodel.Topic;
 import fr.epita.quiz.services.DBConnection;
 
 import java.io.IOException;
@@ -15,82 +17,100 @@ import java.util.List;
 public class OpenQuestionDBDAO {
     public void create(OpenQuestion question) throws SQLException, IOException {
         Connection connection = DBConnection.getConnection();
-        String createTableQuery = "CREATE TABLE IF NOT EXISTS OPEN_QUESTION (id INTEGER PRIMARY KEY AUTOINCREMENT, question TEXT, answer TEXT, difficulty INTEGER, topics TEXT)";
+        String createTableQuery = "CREATE TABLE IF NOT EXISTS QUESTIONS (id INTEGER PRIMARY KEY AUTOINCREMENT, type VARCHAR(255), question TEXT, answer TEXT, difficulty INTEGER, choices TEXT)";
         connection.prepareStatement(createTableQuery).execute();
-        String insertQuery = "INSERT INTO OPEN_QUESTION (question, answer, difficulty, topics) values (?, ?, ?, ?)";
-        PreparedStatement ps = connection.prepareStatement(insertQuery);
-        ps.setString(1, question.getQuestion());
-        ps.setString(2, question.getAnswer());
-        ps.setInt(3, question.getDifficulty());
-        String topics = String.join(";", question.getTopics());
-        ps.setString(4, topics.toUpperCase());
+        String insertQuery = "INSERT INTO QUESTIONS (type, question, answer, difficulty) values (?, ?, ?, ?)";
+        PreparedStatement ps = connection.prepareStatement(insertQuery, PreparedStatement.RETURN_GENERATED_KEYS);
+        ps.setString(1, question.getType().toString());
+        ps.setString(2, question.getQuestion());
+        ps.setString(3, question.getAnswer());
+        ps.setInt(4, question.getDifficulty());
         ps.execute();
+        ResultSet rs = ps.getGeneratedKeys();
+        int id = 0;
+        if (rs.next()) {
+            id = rs.getInt(1);
+        }
+        TopicDBDAO topicDBDAO = new TopicDBDAO();
+        for (Topic topic : question.getTopics()) {
+            topicDBDAO.create(topic, id);
+        }
         connection.close();
     }
 
     public List<OpenQuestion> readAll() throws SQLException, IOException {
         Connection connection = DBConnection.getConnection();
-        String sqlQuery = "select question, answer, difficulty, topics from OPEN_QUESTION";
+        String sqlQuery = "SELECT id, question, answer, difficulty FROM QUESTIONS WHERE type = ?";
         PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);
+        preparedStatement.setString(1, QuestionType.OPEN.toString());
         List<OpenQuestion> questions = getQuestions(preparedStatement);
         connection.close();
         return questions;
     }
 
-    public List<OpenQuestion> read(String[] topics, Integer limit) throws SQLException, IOException {
+    public List<OpenQuestion> read(List<Topic> topics, Integer limit) throws SQLException, IOException {
         Connection connection = DBConnection.getConnection();
-        String sqlQuery = "select question, answer, difficulty, topics from OPEN_QUESTION";
-        if (topics.length > 0) {
-            sqlQuery += " where topics like '%" + topics[0].toUpperCase() + "%'";
-            for (int i = 1; i < topics.length; i++) {
-                sqlQuery += " or topics like '%" + topics[i].toUpperCase() + "%'";
-            }
-        }
-        sqlQuery += " limit ?";
+        String sqlQuery = "SELECT DISTINCT q.id, q.question, q.answer, q.difficulty FROM QUESTIONS q JOIN TOPICS t ON q.id = t.question_id WHERE q.type = ?";
+        sqlQuery += " AND t.name IN (SELECT name FROM TOPICS WHERE name IN (?)) ORDER BY RANDOM() LIMIT ?";
         PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);
+        preparedStatement.setString(1, QuestionType.OPEN.toString());
+        String topicsString = "";
+        for (Topic topic : topics) {
+            topicsString += topic.getName() + ",";
+        }
+        topicsString = topicsString.substring(0, topicsString.length() - 1);
+        preparedStatement.setString(2, topicsString);
         if (limit != null) {
-            preparedStatement.setInt(1, limit);
+            preparedStatement.setInt(3, limit);
         } else {
-            preparedStatement.setInt(1, 10);
+            preparedStatement.setInt(3, 10);
         }
         List<OpenQuestion> questions = getQuestions(preparedStatement);
         connection.close();
         return questions;
     }
 
-    private List<OpenQuestion> getQuestions(PreparedStatement preparedStatement) throws SQLException {
+    private List<OpenQuestion> getQuestions(PreparedStatement preparedStatement) throws SQLException, IOException {
         ResultSet resultSet = preparedStatement.executeQuery();
         List<OpenQuestion> questions = new ArrayList<>();
-        while (resultSet.next()){
+        TopicDBDAO topicDBDAO = new TopicDBDAO();
+        while (resultSet.next()) {
+            int id = resultSet.getInt("id");
             String question = resultSet.getString("question");
             String answer = resultSet.getString("answer");
             int difficulty = resultSet.getInt("difficulty");
-            String topics = resultSet.getString("topics");
-            String[] topicsArray = topics.toUpperCase().split(";");
-            questions.add(new OpenQuestion(question, topicsArray, difficulty, answer));
+            List<Topic> topics = topicDBDAO.read(id);
+            questions.add(new OpenQuestion(question, topics, difficulty, answer));
         }
         return questions;
     }
 
     public void update(OpenQuestion question, Integer id) throws SQLException, IOException {
         Connection connection = DBConnection.getConnection();
-        String updateQuery = "UPDATE OPEN_QUESTION SET question = ?, answer = ?, difficulty = ?, topics = ? WHERE id = ?";
+        String updateQuery = "UPDATE QUESTIONS SET type = ?, question = ?, answer = ?, difficulty = ? WHERE id = ?";
         PreparedStatement ps = connection.prepareStatement(updateQuery);
-        ps.setString(1, question.getQuestion());
-        ps.setString(2, question.getAnswer());
-        ps.setInt(3, question.getDifficulty());
-        String topics = String.join(";", question.getTopics());
-        ps.setString(4, topics.toUpperCase());
+        ps.setString(1, question.getType().toString());
+        ps.setString(2, question.getQuestion());
+        ps.setString(3, question.getAnswer());
+        ps.setInt(4, question.getDifficulty());
         ps.setInt(5, id);
         ps.execute();
+        TopicDBDAO topicDBDAO = new TopicDBDAO();
+        topicDBDAO.deleteWithQuestion(id);
+        for (Topic topic : question.getTopics()) {
+            topicDBDAO.create(topic, id);
+        }
         connection.close();
     }
 
     public void delete(Integer id) throws SQLException, IOException {
         Connection connection = DBConnection.getConnection();
-        PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM OPEN_QUESTION WHERE id = ?");
+        String deleteQuery = "DELETE FROM QUESTIONS WHERE id = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(deleteQuery);
         preparedStatement.setInt(1, id);
         preparedStatement.execute();
+        TopicDBDAO topicDBDAO = new TopicDBDAO();
+        topicDBDAO.deleteWithQuestion(id);
         connection.close();
     }
 }

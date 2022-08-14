@@ -1,10 +1,12 @@
 package fr.epita.quiz.datamodel;
 
+import java.util.List;
+
 public class OpenQuestion extends Question {
     private String answer;
 
-    public OpenQuestion(String question, String[] topics, Integer difficulty, String answer) {
-        super(question, topics, difficulty);
+    public OpenQuestion(String question, List<Topic> topics, Integer difficulty, String answer) {
+        super(question, topics, difficulty, QuestionType.OPEN);
         this.answer = answer;
     }
 

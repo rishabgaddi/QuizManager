@@ -2,6 +2,8 @@ package fr.epita.quiz.services.data.dao;
 
 import fr.epita.quiz.datamodel.MCQChoice;
 import fr.epita.quiz.datamodel.MCQQuestion;
+import fr.epita.quiz.datamodel.QuestionType;
+import fr.epita.quiz.datamodel.Topic;
 import fr.epita.quiz.services.DBConnection;
 
 import java.io.IOException;
@@ -16,14 +18,12 @@ import java.util.List;
 public class MCQQuestionDBDAO {
     public void create(MCQQuestion question) throws SQLException, IOException {
         Connection connection = DBConnection.getConnection();
-        String createTableQuery = "CREATE TABLE IF NOT EXISTS MCQ_QUESTION (id INTEGER PRIMARY KEY AUTOINCREMENT, question TEXT, difficulty INTEGER, topics TEXT, choices TEXT, answers TEXT)";
+        String createTableQuery = "CREATE TABLE IF NOT EXISTS QUESTIONS (id INTEGER PRIMARY KEY AUTOINCREMENT, type VARCHAR(255), question TEXT, answer TEXT, difficulty INTEGER, choices TEXT)";
         connection.prepareStatement(createTableQuery).execute();
-        String insertQuery = "INSERT INTO MCQ_QUESTION (question, difficulty, topics, choices, answers) values (?, ?, ?, ?, ?)";
-        PreparedStatement ps = connection.prepareStatement(insertQuery);
-        ps.setString(1, question.getQuestion());
-        ps.setInt(2, question.getDifficulty());
-        String topics = String.join(";", question.getTopics());
-        ps.setString(3, topics.toUpperCase());
+        String insertQuery = "INSERT INTO QUESTIONS (type, question, answer, difficulty, choices) values (?, ?, ?, ?, ?)";
+        PreparedStatement ps = connection.prepareStatement(insertQuery, PreparedStatement.RETURN_GENERATED_KEYS);
+        ps.setString(1, question.getType().toString());
+        ps.setString(2, question.getQuestion());
         List<MCQChoice> choices = question.getChoices();
         String choicesString = "";
         String answersString = "";
@@ -33,36 +33,48 @@ public class MCQQuestionDBDAO {
                 answersString += choice.getChoice() + ";";
             }
         }
-        ps.setString(4, choicesString);
-        ps.setString(5, answersString);
+        ps.setString(3, answersString);
+        ps.setInt(4, question.getDifficulty());
+        ps.setString(5, choicesString);
         ps.execute();
+        ResultSet rs = ps.getGeneratedKeys();
+        int id = 0;
+        if (rs.next()) {
+            id = rs.getInt(1);
+        }
+        TopicDBDAO topicDBDAO = new TopicDBDAO();
+        for (Topic topic : question.getTopics()) {
+            topicDBDAO.create(topic, id);
+        }
         connection.close();
     }
 
     public List<MCQQuestion> readAll() throws SQLException, IOException {
         Connection connection = DBConnection.getConnection();
-        String sqlQuery = "select question, difficulty, topics, choices, answers from MCQ_QUESTION";
+        String sqlQuery = "SELECT id, question, answer, difficulty, choices FROM QUESTIONS WHERE type = ?";
         PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);
+        preparedStatement.setString(1, QuestionType.MULTIPLE_CHOICE.toString());
         List<MCQQuestion> questions = getQuestions(preparedStatement);
         connection.close();
         return questions;
     }
 
-    public List<MCQQuestion> read(String[] topics, Integer limit) throws SQLException, IOException {
+    public List<MCQQuestion> read(List<Topic> topics, Integer limit) throws SQLException, IOException {
         Connection connection = DBConnection.getConnection();
-        String sqlQuery = "select question, difficulty, topics, choices, answers from MCQ_QUESTION";
-        if (topics.length > 0) {
-            sqlQuery += " where topics like '%" + topics[0].toUpperCase() + "%'";
-            for (int i = 1; i < topics.length; i++) {
-                sqlQuery += " or topics like '%" + topics[i].toUpperCase() + "%'";
-            }
-        }
-        sqlQuery += " limit ?";
+        String sqlQuery = "SELECT DISTINCT q.id, q.question, q.answer, q.difficulty, q.choices FROM QUESTIONS q JOIN TOPICS t ON q.id = t.question_id WHERE q.type = ?";
+        sqlQuery += " AND t.name IN (SELECT name FROM TOPICS WHERE name IN (?)) ORDER BY RANDOM() LIMIT ?";
         PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);
+        preparedStatement.setString(1, QuestionType.MULTIPLE_CHOICE.toString());
+        String topicsString = "";
+        for (Topic topic : topics) {
+            topicsString += topic.getName() + ",";
+        }
+        topicsString = topicsString.substring(0, topicsString.length() - 1);
+        preparedStatement.setString(2, topicsString);
         if (limit != null) {
-            preparedStatement.setInt(1, limit);
+            preparedStatement.setInt(3, limit);
         } else {
-            preparedStatement.setInt(1, 10);
+            preparedStatement.setInt(3, 10);
         }
         List<MCQQuestion> questions = getQuestions(preparedStatement);
         connection.close();
@@ -72,13 +84,13 @@ public class MCQQuestionDBDAO {
     private List<MCQQuestion> getQuestions(PreparedStatement preparedStatement) throws SQLException, IOException {
         ResultSet resultSet = preparedStatement.executeQuery();
         List<MCQQuestion> questions = new ArrayList<>();
-        while (resultSet.next()){
+        TopicDBDAO topicDBDAO = new TopicDBDAO();
+        while (resultSet.next()) {
+            int id = resultSet.getInt("id");
             String question = resultSet.getString("question");
             int difficulty = resultSet.getInt("difficulty");
-            String topics = resultSet.getString("topics");
             String choices = resultSet.getString("choices");
             String answers = resultSet.getString("answers");
-            String [] topicsArray = topics.toUpperCase().split(";");
             List<MCQChoice> choicesList = new ArrayList<>();
             List<String> choicesArray = new ArrayList<>();
             choicesArray.addAll(Arrays.asList(choices.split(";")));
@@ -89,19 +101,18 @@ public class MCQQuestionDBDAO {
                 MCQChoice choice = new MCQChoice(choicesArray.get(i), isValid);
                 choicesList.add(choice);
             }
-            questions.add(new MCQQuestion(question, topicsArray, difficulty, choicesList));
+            List<Topic> topics = topicDBDAO.read(id);
+            questions.add(new MCQQuestion(question, topics, difficulty, choicesList));
         }
         return questions;
     }
 
     public void update(MCQQuestion question, Integer id) throws SQLException, IOException {
         Connection connection = DBConnection.getConnection();
-        String updateQuery = "UPDATE MCQ_QUESTION SET question = ?, difficulty = ?, topics = ?, choices = ?, answers = ? WHERE id = ?";
+        String updateQuery = "UPDATE QUESTIONS SET type = ?, question = ?, answer = ?, difficulty = ?, choices = ? WHERE id = ?";
         PreparedStatement ps = connection.prepareStatement(updateQuery);
-        ps.setString(1, question.getQuestion());
-        ps.setInt(2, question.getDifficulty());
-        String topics = String.join(";", question.getTopics());
-        ps.setString(3, topics.toUpperCase());
+        ps.setString(1, question.getType().toString());
+        ps.setString(2, question.getQuestion());
         List<MCQChoice> choices = question.getChoices();
         String choicesString = "";
         String answersString = "";
@@ -111,19 +122,27 @@ public class MCQQuestionDBDAO {
                 answersString += choice.getChoice() + ";";
             }
         }
-        ps.setString(4, choicesString);
-        ps.setString(5, answersString);
+        ps.setString(3, answersString);
+        ps.setInt(4, question.getDifficulty());
+        ps.setString(5, choicesString);
         ps.setInt(6, id);
         ps.execute();
+        TopicDBDAO topicDBDAO = new TopicDBDAO();
+        topicDBDAO.deleteWithQuestion(id);
+        for (Topic topic : question.getTopics()) {
+            topicDBDAO.create(topic, id);
+        }
         connection.close();
     }
 
     public void delete(Integer id) throws SQLException, IOException {
         Connection connection = DBConnection.getConnection();
-        String deleteQuery = "DELETE FROM MCQ_QUESTION WHERE id = ?";
+        String deleteQuery = "DELETE FROM QUESTIONS WHERE id = ?";
         PreparedStatement ps = connection.prepareStatement(deleteQuery);
         ps.setInt(1, id);
         ps.execute();
+        TopicDBDAO topicDBDAO = new TopicDBDAO();
+        topicDBDAO.deleteWithQuestion(id);
         connection.close();
     }
 }
