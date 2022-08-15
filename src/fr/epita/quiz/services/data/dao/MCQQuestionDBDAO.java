@@ -16,9 +16,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MCQQuestionDBDAO {
-    public void create(MCQQuestion question) throws SQLException, IOException {
+    public Integer create(MCQQuestion question) throws SQLException, IOException {
         Connection connection = DBConnection.getConnection();
-        String createTableQuery = "CREATE TABLE IF NOT EXISTS QUESTIONS (id INTEGER PRIMARY KEY AUTOINCREMENT, type VARCHAR(255), question TEXT, answer TEXT, difficulty INTEGER, choices TEXT)";
+        String createTableQuery = "CREATE TABLE IF NOT EXISTS QUESTIONS (id SERIAL PRIMARY KEY, type VARCHAR(255), question TEXT, answer TEXT, difficulty INTEGER, choices TEXT)";
         connection.prepareStatement(createTableQuery).execute();
         String insertQuery = "INSERT INTO QUESTIONS (type, question, answer, difficulty, choices) values (?, ?, ?, ?, ?)";
         PreparedStatement ps = connection.prepareStatement(insertQuery, PreparedStatement.RETURN_GENERATED_KEYS);
@@ -47,6 +47,7 @@ public class MCQQuestionDBDAO {
             topicDBDAO.create(topic, id);
         }
         connection.close();
+        return id;
     }
 
     public List<MCQQuestion> readAll() throws SQLException, IOException {
@@ -61,20 +62,22 @@ public class MCQQuestionDBDAO {
 
     public List<MCQQuestion> read(List<Topic> topics, Integer limit) throws SQLException, IOException {
         Connection connection = DBConnection.getConnection();
-        String sqlQuery = "SELECT DISTINCT q.id, q.question, q.answer, q.difficulty, q.choices FROM QUESTIONS q JOIN TOPICS t ON q.id = t.question_id WHERE q.type = ?";
-        sqlQuery += " AND t.name IN (SELECT name FROM TOPICS WHERE name IN (?)) ORDER BY RANDOM() LIMIT ?";
+        String sqlQuery = "SELECT q.id, q.question, q.answer, q.difficulty, q.choices, MIN(RANDOM()) AS r" + " " +
+                "FROM QUESTIONS q JOIN TOPICS t ON q.id = t.question_id WHERE q.type = ?";
+        sqlQuery += " AND t.name IN (";
+        if (topics.size() > 0) {
+            sqlQuery += "'" + topics.get(0).getName().toUpperCase() + "'";
+            for (int i = 1; i < topics.size(); i++) {
+                sqlQuery += ", '" + topics.get(i).getName().toUpperCase() + "'";
+            }
+        }
+        sqlQuery += ") GROUP BY q.id ORDER BY r LIMIT ?";
         PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);
         preparedStatement.setString(1, QuestionType.MULTIPLE_CHOICE.toString());
-        String topicsString = "";
-        for (Topic topic : topics) {
-            topicsString += topic.getName() + ",";
-        }
-        topicsString = topicsString.substring(0, topicsString.length() - 1);
-        preparedStatement.setString(2, topicsString);
         if (limit != null) {
-            preparedStatement.setInt(3, limit);
+            preparedStatement.setInt(2, limit);
         } else {
-            preparedStatement.setInt(3, 10);
+            preparedStatement.setInt(2, 10);
         }
         List<MCQQuestion> questions = getQuestions(preparedStatement);
         connection.close();
@@ -90,7 +93,7 @@ public class MCQQuestionDBDAO {
             String question = resultSet.getString("question");
             int difficulty = resultSet.getInt("difficulty");
             String choices = resultSet.getString("choices");
-            String answers = resultSet.getString("answers");
+            String answers = resultSet.getString("answer");
             List<MCQChoice> choicesList = new ArrayList<>();
             List<String> choicesArray = new ArrayList<>();
             choicesArray.addAll(Arrays.asList(choices.split(";")));
@@ -136,13 +139,13 @@ public class MCQQuestionDBDAO {
     }
 
     public void delete(Integer id) throws SQLException, IOException {
+        TopicDBDAO topicDBDAO = new TopicDBDAO();
+        topicDBDAO.deleteWithQuestion(id);
         Connection connection = DBConnection.getConnection();
         String deleteQuery = "DELETE FROM QUESTIONS WHERE id = ?";
         PreparedStatement ps = connection.prepareStatement(deleteQuery);
         ps.setInt(1, id);
         ps.execute();
-        TopicDBDAO topicDBDAO = new TopicDBDAO();
-        topicDBDAO.deleteWithQuestion(id);
         connection.close();
     }
 }

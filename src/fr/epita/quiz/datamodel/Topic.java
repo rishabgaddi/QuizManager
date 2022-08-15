@@ -15,7 +15,10 @@ public class Topic {
         this.name = name;
     }
 
+    @Override
     public String toString() {
-        return "Topic [name=" + name + "]";
+        return "Topic{" +
+                "name='" + name + '\'' +
+                '}';
     }
 }

@@ -17,4 +17,12 @@ public class OpenQuestion extends Question {
     public void setAnswer(String answer) {
         this.answer = answer;
     }
+
+    @Override
+    public String toString() {
+        return "OpenQuestion{" +
+                super.toString() +
+                "answer='" + answer + '\'' +
+                '}';
+    }
 }

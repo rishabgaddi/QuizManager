@@ -24,4 +24,12 @@ public class MCQChoice {
     public void setValid(boolean valid) {
         this.valid = valid;
     }
+
+    @Override
+    public String toString() {
+        return "MCQChoice{" +
+                "choice='" + choice + '\'' +
+                ", valid=" + valid +
+                '}';
+    }
 }

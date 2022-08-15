@@ -11,7 +11,7 @@ public class DBConnection {
     private static Connection connection;
 
     public static Connection getConnection() throws SQLException, IOException {
-        if (connection == null) {
+        if (connection == null || connection.isClosed()) {
             FileReader reader = new FileReader("db.properties");
             Properties properties = new Properties();
             properties.load(reader);

@@ -14,7 +14,7 @@ import java.util.List;
 public class TopicDBDAO {
     public void create(Topic topic, Integer questionID) throws SQLException, IOException {
         Connection connection = DBConnection.getConnection();
-        String createTableQuery = "CREATE TABLE IF NOT EXISTS TOPICS( id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), question_id INTEGER REFERENCES QUESTIONS(id))";
+        String createTableQuery = "CREATE TABLE IF NOT EXISTS TOPICS( id SERIAL PRIMARY KEY, name VARCHAR(255), question_id INTEGER REFERENCES QUESTIONS(id))";
         connection.prepareStatement(createTableQuery).execute();
         String insertQuery = "INSERT INTO TOPICS(name, question_id) values (?, ?)";
         PreparedStatement ps = connection.prepareStatement(insertQuery);
@@ -74,7 +74,7 @@ public class TopicDBDAO {
     public void deleteWithQuestion(Integer questionID) throws SQLException, IOException {
         Connection connection = DBConnection.getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM TOPICS WHERE question_id = ?");
-        preparedStatement.setString(1, questionID.toString());
+        preparedStatement.setInt(1, questionID);
         preparedStatement.execute();
         connection.close();
     }

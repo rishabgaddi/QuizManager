@@ -15,9 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OpenQuestionDBDAO {
-    public void create(OpenQuestion question) throws SQLException, IOException {
+    public Integer create(OpenQuestion question) throws SQLException, IOException {
         Connection connection = DBConnection.getConnection();
-        String createTableQuery = "CREATE TABLE IF NOT EXISTS QUESTIONS (id INTEGER PRIMARY KEY AUTOINCREMENT, type VARCHAR(255), question TEXT, answer TEXT, difficulty INTEGER, choices TEXT)";
+        String createTableQuery = "CREATE TABLE IF NOT EXISTS QUESTIONS (id SERIAL PRIMARY KEY, type VARCHAR(255), question TEXT, answer TEXT, difficulty INTEGER, choices TEXT)";
         connection.prepareStatement(createTableQuery).execute();
         String insertQuery = "INSERT INTO QUESTIONS (type, question, answer, difficulty) values (?, ?, ?, ?)";
         PreparedStatement ps = connection.prepareStatement(insertQuery, PreparedStatement.RETURN_GENERATED_KEYS);
@@ -36,6 +36,7 @@ public class OpenQuestionDBDAO {
             topicDBDAO.create(topic, id);
         }
         connection.close();
+        return id;
     }
 
     public List<OpenQuestion> readAll() throws SQLException, IOException {
@@ -50,20 +51,22 @@ public class OpenQuestionDBDAO {
 
     public List<OpenQuestion> read(List<Topic> topics, Integer limit) throws SQLException, IOException {
         Connection connection = DBConnection.getConnection();
-        String sqlQuery = "SELECT DISTINCT q.id, q.question, q.answer, q.difficulty FROM QUESTIONS q JOIN TOPICS t ON q.id = t.question_id WHERE q.type = ?";
-        sqlQuery += " AND t.name IN (SELECT name FROM TOPICS WHERE name IN (?)) ORDER BY RANDOM() LIMIT ?";
+        String sqlQuery = "SELECT q.id, q.question, q.answer, q.difficulty, MIN(RANDOM()) AS r" + " " +
+                "FROM QUESTIONS q JOIN TOPICS t ON q.id = t.question_id WHERE q.type = ?";
+        sqlQuery += " AND t.name IN (";
+        if (topics.size() > 0) {
+            sqlQuery += "'" + topics.get(0).getName().toUpperCase() + "'";
+            for (int i = 1; i < topics.size(); i++) {
+                sqlQuery += ", '" + topics.get(i).getName().toUpperCase() + "'";
+            }
+        }
+        sqlQuery += ") GROUP BY q.id ORDER BY r LIMIT ?";
         PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);
         preparedStatement.setString(1, QuestionType.OPEN.toString());
-        String topicsString = "";
-        for (Topic topic : topics) {
-            topicsString += topic.getName() + ",";
-        }
-        topicsString = topicsString.substring(0, topicsString.length() - 1);
-        preparedStatement.setString(2, topicsString);
         if (limit != null) {
-            preparedStatement.setInt(3, limit);
+            preparedStatement.setInt(2, limit);
         } else {
-            preparedStatement.setInt(3, 10);
+            preparedStatement.setInt(2, 10);
         }
         List<OpenQuestion> questions = getQuestions(preparedStatement);
         connection.close();
@@ -104,13 +107,13 @@ public class OpenQuestionDBDAO {
     }
 
     public void delete(Integer id) throws SQLException, IOException {
+        TopicDBDAO topicDBDAO = new TopicDBDAO();
+        topicDBDAO.deleteWithQuestion(id);
         Connection connection = DBConnection.getConnection();
         String deleteQuery = "DELETE FROM QUESTIONS WHERE id = ?";
         PreparedStatement preparedStatement = connection.prepareStatement(deleteQuery);
         preparedStatement.setInt(1, id);
         preparedStatement.execute();
-        TopicDBDAO topicDBDAO = new TopicDBDAO();
-        topicDBDAO.deleteWithQuestion(id);
         connection.close();
     }
 }

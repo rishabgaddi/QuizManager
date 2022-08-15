@@ -15,7 +15,15 @@ public class MCQQuestion extends Question {
         return choices;
     }
 
-    public void setChoices(ArrayList<MCQChoice> choices) {
+    public void setChoices(List<MCQChoice> choices) {
         this.choices = choices;
+    }
+
+    @Override
+    public String toString() {
+        return "MCQQuestion{" +
+                super.toString() +
+                "choices=" + choices +
+                '}';
     }
 }

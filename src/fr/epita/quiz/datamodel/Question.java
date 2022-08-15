@@ -15,14 +15,6 @@ public class Question {
         this.type = type;
     }
 
-    public Enum<QuestionType> getType() {
-        return type;
-    }
-
-    public void setType(Enum<QuestionType> type) {
-        this.type = type;
-    }
-
     public String getQuestion() {
         return question;
     }
@@ -45,5 +37,23 @@ public class Question {
 
     public void setDifficulty(Integer difficulty) {
         this.difficulty = difficulty;
+    }
+
+    public Enum<QuestionType> getType() {
+        return type;
+    }
+
+    public void setType(Enum<QuestionType> type) {
+        this.type = type;
+    }
+
+    @Override
+    public String toString() {
+        return "Question{" +
+                "question='" + question + '\'' +
+                ", topics=" + topics +
+                ", difficulty=" + difficulty +
+                ", type=" + type +
+                '}';
     }
 }
