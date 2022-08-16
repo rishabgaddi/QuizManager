@@ -1,7 +1,6 @@
 package fr.epita.quiz.tests;
 
 import fr.epita.quiz.datamodel.OpenQuestion;
-import fr.epita.quiz.datamodel.QuestionType;
 import fr.epita.quiz.datamodel.Topic;
 import fr.epita.quiz.services.data.dao.OpenQuestionDBDAO;
 

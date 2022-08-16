@@ -30,7 +30,7 @@ public class Launcher {
             System.out.println("Invalid input");
             return;
         }
-        String userType = "";
+        String userType;
         switch (option) {
             case 1:
                 userType = "admin";
@@ -134,7 +134,7 @@ public class Launcher {
                         break;
                 }
             }
-        } else if ("student".equals(userType)) {
+        } else {
             while (!"x".equals(userResponse)) {
                 System.out.println("What operation would you like to do?");
                 System.out.println("a. Take a quiz");
@@ -157,9 +157,6 @@ public class Launcher {
                         break;
                 }
             }
-        } else {
-            scanner.close();
-            return;
         }
         scanner.close();
     }
@@ -180,7 +177,7 @@ public class Launcher {
         System.out.println("Enter the topic id, if you want to select multiple topics, enter them separated by a semicolon: ");
         String topic = scanner.nextLine();
         String[] topicArray = topic.split(";");
-        List<Topic> topicList2 = new ArrayList<Topic>();
+        List<Topic> topicList2 = new ArrayList<>();
         for (String topic2 : topicArray) {
             topicList2.add(topicList.get(Integer.parseInt(topic2)));
         }

@@ -23,7 +23,7 @@ public class QuestionManager {
         int openDifficulty = sc.nextInt();
         sc.nextLine();
         String[] openTopicArray = openTopics.split(";");
-        List<Topic> openTopicList = new ArrayList<Topic>();
+        List<Topic> openTopicList = new ArrayList<>();
         for (String topic : openTopicArray) {
             openTopicList.add(new Topic(topic));
         }
@@ -39,11 +39,11 @@ public class QuestionManager {
         int mcqDifficulty = sc.nextInt();
         sc.nextLine();
         String[] mcqTopicArray = mcqTopics.split(";");
-        List<Topic> mcqTopicList = new ArrayList<Topic>();
+        List<Topic> mcqTopicList = new ArrayList<>();
         for (String topic : mcqTopicArray) {
             mcqTopicList.add(new Topic(topic));
         }
-        List<MCQChoice> mcqChoices = new ArrayList<MCQChoice>();
+        List<MCQChoice> mcqChoices = new ArrayList<>();
         System.out.println("Enter the choices and if it is the correct answer");
         String userChoice = "";
         while (!"q".equals(userChoice)) {
@@ -197,7 +197,7 @@ public class QuestionManager {
         System.out.println("Enter the topic id, if you want to select multiple topics, enter them separated by a semicolon: ");
         String topic = sc.nextLine();
         String[] topicArray = topic.split(";");
-        List<Topic> topicList2 = new ArrayList<Topic>();
+        List<Topic> topicList2 = new ArrayList<>();
         for (String topic2 : topicArray) {
             topicList2.add(topicList.get(Integer.parseInt(topic2)));
         }

@@ -6,12 +6,12 @@ import java.util.Properties;
 
 public class Authentication {
     public static boolean authenticate(String type, String user, String password) throws IOException {
-        boolean aunthenticated = false;
+        boolean authenticated = false;
         FileReader reader = new FileReader("credentials.properties");
         Properties properties = new Properties();
         properties.load(reader);
-        String defaultUser = "";
-        String defaultPassword = "";
+        String defaultUser;
+        String defaultPassword;
         if ("admin".equals(type)) {
             defaultUser = properties.getProperty("adminUser");
             defaultPassword = properties.getProperty("adminPassword");
@@ -22,8 +22,8 @@ public class Authentication {
             return false;
         }
         if (defaultUser.equals(user) && defaultPassword.equals(password)) {
-            aunthenticated = true;
+            authenticated = true;
         }
-        return aunthenticated;
+        return authenticated;
     }
 }

@@ -1,6 +1,5 @@
 package fr.epita.quiz.datamodel;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MCQQuestion extends Question {

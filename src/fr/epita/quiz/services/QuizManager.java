@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.Scanner;
 
 public class QuizManager {
-    private static File file = new File("./quiz.txt");
+    private static final File file = new File("./quiz.txt");
 
     public static void takeQuiz(Quiz quiz, Integer totalQuestions, Scanner scanner) throws SQLException, IOException {
-        Integer totalScore = 0;
+        int totalScore = 0;
         Integer questionNumber = 0;
         if (QuestionType.OPEN.equals(quiz.getType())) {
             OpenQuestionDBDAO dao = new OpenQuestionDBDAO();
@@ -81,7 +81,7 @@ public class QuizManager {
         PrintWriter pw = new PrintWriter(outputStream);
 
         Integer questionNumber = 0;
-        String line = "";
+        String line;
         if (QuestionType.OPEN.equals(quiz.getType())) {
             OpenQuestionDBDAO dao = new OpenQuestionDBDAO();
             List<OpenQuestion> questions = dao.read(quiz.getTopics(), totalQuestions);

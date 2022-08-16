@@ -1,7 +1,6 @@
 package fr.epita.quiz.services.data.dao;
 
 import fr.epita.quiz.datamodel.OpenQuestion;
-import fr.epita.quiz.datamodel.Question;
 import fr.epita.quiz.datamodel.QuestionType;
 import fr.epita.quiz.datamodel.Topic;
 import fr.epita.quiz.services.DBConnection;
@@ -51,21 +50,21 @@ public class OpenQuestionDBDAO {
 
     public List<OpenQuestion> read(List<Topic> topics, Integer limit) throws SQLException, IOException {
         Connection connection = DBConnection.getConnection();
-        String sqlQuery = "SELECT q.id, q.question, q.answer, q.difficulty, MIN(RANDOM()) AS r" + " " +
-                "FROM QUESTIONS q JOIN TOPICS t ON q.id = t.question_id WHERE q.type = ?";
-        sqlQuery += " AND t.name IN (";
+        StringBuilder sqlQuery = new StringBuilder("SELECT q.id, q.question, q.answer, q.difficulty, MIN(RANDOM()) AS r" + " " +
+                "FROM QUESTIONS q JOIN TOPICS t ON q.id = t.question_id WHERE q.type = ?");
+        sqlQuery.append(" AND t.name IN (");
         if (topics.size() > 0) {
-            sqlQuery += "'" + topics.get(0).getName().toUpperCase() + "'";
+            sqlQuery.append("'").append(topics.get(0).getName().toUpperCase()).append("'");
             for (int i = 1; i < topics.size(); i++) {
-                sqlQuery += ", '" + topics.get(i).getName().toUpperCase() + "'";
+                sqlQuery.append(", '").append(topics.get(i).getName().toUpperCase()).append("'");
             }
         }
         if (limit != null) {
-            sqlQuery += ") GROUP BY q.id ORDER BY r LIMIT ? ";
+            sqlQuery.append(") GROUP BY q.id ORDER BY r LIMIT ? ");
         } else {
-            sqlQuery += ") GROUP BY q.id ORDER BY r";
+            sqlQuery.append(") GROUP BY q.id ORDER BY r");
         }
-        PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);
+        PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery.toString());
         preparedStatement.setString(1, QuestionType.OPEN.toString());
         if (limit != null) {
             preparedStatement.setInt(2, limit);

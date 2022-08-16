@@ -25,17 +25,17 @@ public class MCQQuestionDBDAO {
         ps.setString(1, question.getType().toString());
         ps.setString(2, question.getQuestion());
         List<MCQChoice> choices = question.getChoices();
-        String choicesString = "";
-        String answersString = "";
+        StringBuilder choicesString = new StringBuilder();
+        StringBuilder answersString = new StringBuilder();
         for (MCQChoice choice : choices) {
-            choicesString += choice.getChoice() + ";";
+            choicesString.append(choice.getChoice()).append(";");
             if (choice.isValid()) {
-                answersString += choice.getChoice() + ";";
+                answersString.append(choice.getChoice()).append(";");
             }
         }
-        ps.setString(3, answersString);
+        ps.setString(3, answersString.toString());
         ps.setInt(4, question.getDifficulty());
-        ps.setString(5, choicesString);
+        ps.setString(5, choicesString.toString());
         ps.execute();
         ResultSet rs = ps.getGeneratedKeys();
         int id = 0;
@@ -62,21 +62,21 @@ public class MCQQuestionDBDAO {
 
     public List<MCQQuestion> read(List<Topic> topics, Integer limit) throws SQLException, IOException {
         Connection connection = DBConnection.getConnection();
-        String sqlQuery = "SELECT q.id, q.question, q.answer, q.difficulty, q.choices, MIN(RANDOM()) AS r" + " " +
-                "FROM QUESTIONS q JOIN TOPICS t ON q.id = t.question_id WHERE q.type = ?";
-        sqlQuery += " AND t.name IN (";
+        StringBuilder sqlQuery = new StringBuilder("SELECT q.id, q.question, q.answer, q.difficulty, q.choices, MIN(RANDOM()) AS r" + " " +
+                "FROM QUESTIONS q JOIN TOPICS t ON q.id = t.question_id WHERE q.type = ?");
+        sqlQuery.append(" AND t.name IN (");
         if (topics.size() > 0) {
-            sqlQuery += "'" + topics.get(0).getName().toUpperCase() + "'";
+            sqlQuery.append("'").append(topics.get(0).getName().toUpperCase()).append("'");
             for (int i = 1; i < topics.size(); i++) {
-                sqlQuery += ", '" + topics.get(i).getName().toUpperCase() + "'";
+                sqlQuery.append(", '").append(topics.get(i).getName().toUpperCase()).append("'");
             }
         }
         if (limit != null) {
-            sqlQuery += ") GROUP BY q.id ORDER BY r LIMIT ? ";
+            sqlQuery.append(") GROUP BY q.id ORDER BY r LIMIT ? ");
         } else {
-            sqlQuery += ") GROUP BY q.id ORDER BY r";
+            sqlQuery.append(") GROUP BY q.id ORDER BY r");
         }
-        PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);
+        PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery.toString());
         preparedStatement.setString(1, QuestionType.MULTIPLE_CHOICE.toString());
         if (limit != null) {
             preparedStatement.setInt(2, limit);
@@ -101,9 +101,9 @@ public class MCQQuestionDBDAO {
             choicesArray.addAll(Arrays.asList(choices.split(";")));
             List<String> answersArray = new ArrayList<>();
             answersArray.addAll(Arrays.asList(answers.split(";")));
-            for (int i = 0; i < choicesArray.size(); i++) {
-                boolean isValid = answersArray.contains(choicesArray.get(i));
-                MCQChoice choice = new MCQChoice(choicesArray.get(i), isValid);
+            for (String s : choicesArray) {
+                boolean isValid = answersArray.contains(s);
+                MCQChoice choice = new MCQChoice(s, isValid);
                 choicesList.add(choice);
             }
             List<Topic> topics = topicDBDAO.read(id);
@@ -119,17 +119,17 @@ public class MCQQuestionDBDAO {
         ps.setString(1, question.getType().toString());
         ps.setString(2, question.getQuestion());
         List<MCQChoice> choices = question.getChoices();
-        String choicesString = "";
-        String answersString = "";
+        StringBuilder choicesString = new StringBuilder();
+        StringBuilder answersString = new StringBuilder();
         for (MCQChoice choice : choices) {
-            choicesString += choice.getChoice() + ";";
+            choicesString.append(choice.getChoice()).append(";");
             if (choice.isValid()) {
-                answersString += choice.getChoice() + ";";
+                answersString.append(choice.getChoice()).append(";");
             }
         }
-        ps.setString(3, answersString);
+        ps.setString(3, answersString.toString());
         ps.setInt(4, question.getDifficulty());
-        ps.setString(5, choicesString);
+        ps.setString(5, choicesString.toString());
         ps.setInt(6, id);
         ps.execute();
         TopicDBDAO topicDBDAO = new TopicDBDAO();

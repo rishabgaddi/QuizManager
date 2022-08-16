@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StudentCSVDAO {
-    private File file = new File("./quiz-manager/test/students.csv");
+    private final File file = new File("./quiz-manager/test/students.csv");
 
     public void create(Student student) throws FileNotFoundException {
         FileOutputStream outputStream = new FileOutputStream(file);
