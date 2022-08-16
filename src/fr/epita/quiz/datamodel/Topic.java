@@ -4,7 +4,7 @@ public class Topic {
     private String name;
 
     public Topic(String name) {
-        this.name = name;
+        this.name = name.trim().toUpperCase();
     }
 
     public String getName() {
@@ -12,7 +12,7 @@ public class Topic {
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.name = name.trim().toUpperCase();
     }
 
     @Override

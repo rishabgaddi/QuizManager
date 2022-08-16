@@ -11,8 +11,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class QuizManager {
-    public void takeQuiz(Quiz quiz, Integer totalQuestions) throws SQLException, IOException {
-        Scanner scanner = new Scanner(System.in);
+    public static void takeQuiz(Quiz quiz, Integer totalQuestions, Scanner scanner) throws SQLException, IOException {
         Integer totalScore = 0;
         Integer questionNumber = 0;
         if (QuestionType.OPEN.equals(quiz.getType())) {
@@ -23,7 +22,7 @@ public class QuizManager {
                 System.out.println(questionNumber + ". " + openQuestion.getQuestion());
                 System.out.println("Your answer: ");
                 String answer = scanner.nextLine();
-                if (openQuestion.getAnswer().equals(answer)) {
+                if (openQuestion.getAnswer().equalsIgnoreCase(answer)) {
                     totalScore++;
                 }
             }
@@ -36,7 +35,7 @@ public class QuizManager {
                 for (int i = 1; i <= mcqQuestion.getChoices().size(); i++) {
                     System.out.println("  (" + i + ") " + mcqQuestion.getChoices().get(i - 1).getChoice());
                 }
-                System.out.println("Your answer: ");
+                System.out.println("Enter choice of the answer (if multiple answers, separate them with a semicolon): ");
                 String answer = scanner.nextLine();
                 String[] answers = answer.split(";");
                 boolean allCorrect = false;
@@ -60,6 +59,5 @@ public class QuizManager {
             }
         }
         System.out.println("Your score is: " + totalScore);
-        scanner.close();
     }
 }

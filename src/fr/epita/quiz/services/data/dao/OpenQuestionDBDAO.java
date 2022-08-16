@@ -60,13 +60,15 @@ public class OpenQuestionDBDAO {
                 sqlQuery += ", '" + topics.get(i).getName().toUpperCase() + "'";
             }
         }
-        sqlQuery += ") GROUP BY q.id ORDER BY r LIMIT ?";
+        if (limit != null) {
+            sqlQuery += ") GROUP BY q.id ORDER BY r LIMIT ? ";
+        } else {
+            sqlQuery += ") GROUP BY q.id ORDER BY r";
+        }
         PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);
         preparedStatement.setString(1, QuestionType.OPEN.toString());
         if (limit != null) {
             preparedStatement.setInt(2, limit);
-        } else {
-            preparedStatement.setInt(2, 10);
         }
         List<OpenQuestion> questions = getQuestions(preparedStatement);
         connection.close();

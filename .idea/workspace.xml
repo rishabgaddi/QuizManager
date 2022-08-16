@@ -1,24 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4d63240d-f29c-4c77-b59e-6d8d4d0e54fd" name="Changes" comment="Introduced Topic class and refactored the code accordingly.">
-      <change afterPath="$PROJECT_DIR$/src/fr/epita/quiz/launcher/Launcher.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/fr/epita/quiz/tests/TestMCQQuestionDBDAO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/fr/epita/quiz/tests/TestOpenQuestionDBDAO.java" afterDir="false" />
+    <list default="true" id="4d63240d-f29c-4c77-b59e-6d8d4d0e54fd" name="Changes" comment="Added tests for MCQ and Open questions.&#10;Added initial Launcher file.">
+      <change afterPath="$PROJECT_DIR$/credentials.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/fr/epita/quiz/services/Authentication.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/fr/epita/quiz/services/QuestionManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/fr/epita/quiz/services/data/dao/QuestionDBDAO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/fr/epita/quiz/tests/TestQuestionDBDAO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Quiz Manager.iml" beforeDir="false" afterPath="$PROJECT_DIR$/Quiz Manager.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fr/epita/quiz/datamodel/MCQChoice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fr/epita/quiz/datamodel/MCQChoice.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fr/epita/quiz/datamodel/MCQQuestion.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fr/epita/quiz/datamodel/MCQQuestion.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fr/epita/quiz/datamodel/OpenQuestion.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fr/epita/quiz/datamodel/OpenQuestion.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fr/epita/quiz/datamodel/Question.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fr/epita/quiz/datamodel/Question.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fr/epita/quiz/datamodel/Quiz.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fr/epita/quiz/datamodel/Quiz.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fr/epita/quiz/datamodel/Student.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fr/epita/quiz/datamodel/Student.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/fr/epita/quiz/datamodel/Topic.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fr/epita/quiz/datamodel/Topic.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fr/epita/quiz/services/DBConnection.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fr/epita/quiz/services/DBConnection.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fr/epita/quiz/launcher/Launcher.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fr/epita/quiz/launcher/Launcher.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/fr/epita/quiz/services/QuizManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fr/epita/quiz/services/QuizManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/fr/epita/quiz/services/data/dao/MCQQuestionDBDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fr/epita/quiz/services/data/dao/MCQQuestionDBDAO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/fr/epita/quiz/services/data/dao/OpenQuestionDBDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fr/epita/quiz/services/data/dao/OpenQuestionDBDAO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fr/epita/quiz/services/data/dao/TopicDBDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fr/epita/quiz/services/data/dao/TopicDBDAO.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,19 +70,6 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="QuizManager" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="fr.epita.quiz.services.QuizManager" />
-      <module name="Quiz Manager" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="fr.epita.quiz.services.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="TestMCQQuestionDBDAO" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="fr.epita.quiz.tests.TestMCQQuestionDBDAO" />
       <module name="Quiz Manager" />
@@ -115,12 +96,39 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="TestQuestionDBDAO" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="fr.epita.quiz.tests.TestQuestionDBDAO" />
+      <module name="Quiz Manager" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="fr.epita.quiz.tests.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="fr.epita.quiz.services.QuizManager" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="fr.epita.quiz.services.QuizManager" />
+      <module name="Quiz Manager" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="fr.epita.quiz.services.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Application.Launcher" />
+        <item itemvalue="Application.TestQuestionDBDAO" />
         <item itemvalue="Application.TestMCQQuestionDBDAO" />
         <item itemvalue="Application.TestOpenQuestionDBDAO" />
-        <item itemvalue="Application.QuizManager" />
+        <item itemvalue="Application.fr.epita.quiz.services.QuizManager" />
       </list>
     </recent_temporary>
   </component>
@@ -147,7 +155,14 @@
       <option name="project" value="LOCAL" />
       <updated>1660484656751</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Added tests for MCQ and Open questions.&#10;Added initial Launcher file.">
+      <created>1660546600631</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1660546600631</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -164,16 +179,12 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Initial commit with classes and services" />
     <MESSAGE value="Introduced Topic class and refactored the code accordingly." />
-    <option name="LAST_COMMIT_MESSAGE" value="Introduced Topic class and refactored the code accordingly." />
+    <MESSAGE value="Added tests for MCQ and Open questions.&#10;Added initial Launcher file." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added tests for MCQ and Open questions.&#10;Added initial Launcher file." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/fr/epita/quiz/services/data/dao/OpenQuestionDBDAO.java</url>
-          <line>76</line>
-          <option name="timeStamp" value="15" />
-        </line-breakpoint>
         <breakpoint enabled="true" type="java-exception">
           <properties class="java.lang.NullPointerException" package="java.lang" />
           <option name="timeStamp" value="16" />
