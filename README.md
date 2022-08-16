@@ -6,12 +6,14 @@ and also take or export the quiz.
 A student can take or export the quiz and see their score.
 ### User Guide
 There is only one Launcher for this project.
+The Launcher is located at /src/fr.epita.quiz.launcher/Launcher.java.
+<br />
 Before you can run the Launcher, you need to provide the following information.
 <br />
 In the db.properties file,
 
 ```
-url=<your_db_url>
+url=<your_postgres_db_url>
 username=<db_user>
 password=<db_password>
 ```
@@ -23,7 +25,6 @@ adminPassword=<admin_password>
 studentUser=<student_user>
 studentPassword=<student_password>
 ```
-
 ### Technical Guide
 The project is built considering PostgreSQL as the database.
 The sql queries written are in regards to the PostgreSQL database.
