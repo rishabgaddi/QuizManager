@@ -73,6 +73,7 @@ public class Launcher {
                 System.out.println("h. See all the students");
                 System.out.println("i. Delete a student");
                 System.out.println("j. Take a quiz");
+                System.out.println("k. Export a quiz");
                 System.out.println("x. Exit");
                 System.out.println("Please enter your choice: ");
                 userResponse = scanner.nextLine();
@@ -120,7 +121,10 @@ public class Launcher {
                         System.out.println("Student deleted successfully\n" + student);
                         break;
                     case "j":
-                        quizHandler(scanner);
+                        quizHandler(scanner, false);
+                        break;
+                    case "k":
+                        quizHandler(scanner, true);
                         break;
                     case "x":
                         System.out.println("Exiting");
@@ -134,12 +138,16 @@ public class Launcher {
             while (!"x".equals(userResponse)) {
                 System.out.println("What operation would you like to do?");
                 System.out.println("a. Take a quiz");
+                System.out.println("b. Export a quiz");
                 System.out.println("x. Exit");
                 System.out.println("Please enter your choice: ");
                 userResponse = scanner.nextLine();
                 switch (userResponse) {
                     case "a":
-                        quizHandler(scanner);
+                        quizHandler(scanner, false);
+                        break;
+                    case "b":
+                        quizHandler(scanner, true);
                         break;
                     case "x":
                         System.out.println("Exiting");
@@ -156,7 +164,7 @@ public class Launcher {
         scanner.close();
     }
 
-    private static void quizHandler(Scanner scanner) throws SQLException, IOException {
+    private static void quizHandler(Scanner scanner, boolean export) throws SQLException, IOException {
         System.out.println("Select the type of quiz you want to take: ");
         for (QuestionType qt : QuestionType.values()) {
             System.out.println(qt.ordinal() + " " + qt);
@@ -182,11 +190,19 @@ public class Launcher {
         switch (quizType) {
             case 0:
                 Quiz quiz = new Quiz(QuestionType.OPEN, topicList2);
-                QuizManager.takeQuiz(quiz, numberOfQuestions, scanner);
+                if (export) {
+                    QuizManager.exportQuiz(quiz, numberOfQuestions);
+                } else {
+                    QuizManager.takeQuiz(quiz, numberOfQuestions, scanner);
+                }
                 break;
             case 1:
-                Quiz quiz1 = new Quiz(QuestionType.MULTIPLE_CHOICE, topicList2);
-                QuizManager.takeQuiz(quiz1, numberOfQuestions, scanner);
+                quiz = new Quiz(QuestionType.MULTIPLE_CHOICE, topicList2);
+                if (export) {
+                    QuizManager.exportQuiz(quiz, numberOfQuestions);
+                } else {
+                    QuizManager.takeQuiz(quiz, numberOfQuestions, scanner);
+                }
                 break;
             default:
                 System.out.println("Invalid option");
